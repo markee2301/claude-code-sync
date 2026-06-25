@@ -30,7 +30,7 @@ $idx = 0
 if (-not [int]::TryParse($n, [ref]$idx) -or $idx -lt 1 -or $idx -gt $snaps.Count) { Write-Host 'Invalid selection.'; exit 1 }
 $snap = $snaps[$idx - 1]
 
-Write-Host "`nContents of $snap:"; rclone tree "r2crypt:backups/$snap"
+Write-Host "`nContents of ${snap}:"; rclone tree "r2crypt:backups/$snap"
 
 $rel = Read-Host "`nPath to restore (e.g. skills/foo or commands/x.md), or 'all'"
 if ([string]::IsNullOrWhiteSpace($rel)) { Write-Host 'Nothing selected.'; exit 1 }
