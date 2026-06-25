@@ -72,6 +72,12 @@ remember — never stored). **Use the same passphrase on every machine.**
 **canary** file. `pull` decrypts that canary *before* downloading anything, so a wrong
 passphrase is caught immediately and re-prompted instead of pulling undecryptable data.
 
+> ### 👉 Rule of thumb: **pull before you start working, push when you're done.**
+> `push` mirrors your machine to R2 (so push from whichever machine is up to date); `pull`
+> brings changes down. Following this order keeps every machine current and avoids
+> overwriting newer work. See [How push and pull differ](#how-push-and-pull-differ-important)
+> for the details and the built-in backup safety net.
+
 ## What syncs (and what doesn't)
 
 Everything is decided by `claude-filter.txt` — edit it to change these defaults.
