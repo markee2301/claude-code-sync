@@ -15,30 +15,50 @@ passphrase on another machine and it decrypts.
 - A Cloudflare R2 bucket + an API token (Dashboard → R2 → Manage API Tokens)
 - Node.js (already ships with Claude Code) — used for the MCP + plugin steps
 
-## Setup (once per machine)
+## Setup & daily use
+
+Clone it once on each machine:
 
 ```bash
 git clone https://github.com/markee2301/claude-code-sync.git
 cd claude-code-sync
-./setup.sh        # Windows PowerShell: .\setup.ps1
 ```
 
-`setup` asks for your R2 Account ID, Access Key, Secret (hidden), and bucket, then writes a
-**gitignored** `rclone.conf`. Your secret key and passphrase never touch git.
+> **Run the scripts with `bash` (macOS/Linux/Git Bash) or the `.ps1` via `-File`
+> (Windows PowerShell).** Don't double-click them or type `./script.sh` in PowerShell —
+> Windows tries to *open* the file (app picker / text editor) instead of running it.
 
-## Daily use
+### macOS / Linux  (Terminal — bash or zsh)
 
 ```bash
-./claude-push.sh   # this machine  -> encrypt -> R2
-./claude-pull.sh   # R2 -> decrypt -> this machine
+bash setup.sh         # one-time: enter R2 Account ID, Access Key, Secret (hidden), bucket
+bash claude-push.sh   # this machine  -> encrypt -> R2
+bash claude-pull.sh   # R2 -> decrypt -> this machine
 ```
 
-Each prompts for your encryption passphrase (the one thing to remember — it's never
-stored). Use the **same passphrase on every machine.**
+### Windows  (PowerShell)
 
-`push` asks for it **twice** (typo guard). `push` also writes a small encrypted **canary**
-file, and `pull` decrypts that canary *before* downloading anything — so a wrong passphrase
-is caught immediately and re-prompted instead of pulling undecryptable data.
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\claude-push.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\claude-pull.ps1
+```
+
+### Windows  (Git Bash — simplest, same as macOS)
+
+```bash
+bash setup.sh
+bash claude-push.sh
+bash claude-pull.sh
+```
+
+`setup` writes a **gitignored** `rclone.conf` — your secret key and passphrase never touch
+git. `push` and `pull` each prompt for your encryption passphrase (the one thing to
+remember — never stored). **Use the same passphrase on every machine.**
+
+`push` asks for the passphrase **twice** (typo guard) and writes a small encrypted
+**canary** file. `pull` decrypts that canary *before* downloading anything, so a wrong
+passphrase is caught immediately and re-prompted instead of pulling undecryptable data.
 
 ## What syncs
 
