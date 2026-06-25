@@ -1,6 +1,9 @@
 # Real config holds your R2 keys + obscured crypt password — never commit it.
 rclone.conf
 
+# Files pulled out of backups by claude-restore — local only
+restored/
+
 # Local/OS noise
 *.age
 .DS_Store

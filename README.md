@@ -158,7 +158,17 @@ The `"…recoverable at backups/…"` line printed on every push is informationa
 
 ### Restoring a file
 
-From your `claude-code-sync` folder:
+Easiest — run the interactive helper, which **lists every backup snapshot, lets you pick
+one, shows what's inside, and restores a file or folder** (to a safe `./restored/` folder by
+default, or straight into `~/.claude`):
+
+```bash
+bash claude-restore.sh          # macOS / Linux / Git Bash
+#  Windows PowerShell:
+#  powershell -NoProfile -ExecutionPolicy Bypass -File .\claude-restore.ps1
+```
+
+Prefer doing it by hand? The same thing with raw rclone, from your `claude-code-sync` folder:
 
 ```bash
 export RCLONE_CONFIG="$PWD/rclone.conf"
@@ -169,8 +179,8 @@ rclone tree r2crypt:backups/<timestamp>            # see what's inside one
 rclone copy "r2crypt:backups/<timestamp>/skills/foo/SKILL.md" ./restored/   # pull a file back
 ```
 
-Copy the recovered file into `~/.claude/` to roll it back. There's no "restore everything to
-date X" command — backups are deltas, so recovery is a deliberate cherry-pick.
+There's no "restore everything to date X" command — backups are deltas, so recovery is a
+deliberate cherry-pick.
 
 Backups accumulate (one folder per changed push). To prune old ones:
 
