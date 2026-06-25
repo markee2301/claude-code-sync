@@ -1,0 +1,37 @@
+# What travels between machines. rclone filter rules, first match wins.
+# Paths are relative to ~/.claude. Edit to taste.
+
+# --- Heavy / secret: never sync (listed first so they win) ---
+- /plugins/cache/**
+- /plugins/marketplaces/**
+- /projects/**
+- /sessions/**
+- /history.jsonl
+- /shell-snapshots/**
+- /file-history/**
+- /cache/**
+- /image-cache/**
+- /paste-cache/**
+- /downloads/**
+- /ide/**
+- /backups/**
+- /tasks/**.lock
+- /.credentials.json
+- /settings.local.json
+- /*.log
+
+# --- Synced (ON) ---
++ /settings.json
++ /MEMORY.md
++ /mcp-servers.json
++ /skills/**
++ /agents/**
++ /commands/**
++ /memory/**
++ /plans/**
++ /tasks/**
++ /plugins/installed_plugins.json
++ /plugins/known_marketplaces.json
+
+# --- Everything else excluded ---
+- *

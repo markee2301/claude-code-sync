@@ -1,0 +1,20 @@
+# Copy to rclone.conf and fill in your Cloudflare R2 values, OR just run ./setup.sh (./setup.ps1).
+# The real rclone.conf is gitignored — never commit it.
+
+[r2]
+type = s3
+provider = Cloudflare
+access_key_id = YOUR_R2_ACCESS_KEY_ID
+secret_access_key = YOUR_R2_SECRET_ACCESS_KEY
+endpoint = https://YOUR_ACCOUNT_ID.r2.cloudflarestorage.com
+region = auto
+acl = private
+no_check_bucket = true
+
+[r2crypt]
+type = crypt
+remote = r2:YOUR_BUCKET/claude
+filename_encryption = standard
+directory_name_encryption = true
+# No password stored here on purpose. The push/pull scripts supply it at runtime
+# via RCLONE_CONFIG_R2CRYPT_PASSWORD (obscured), prompted each run.

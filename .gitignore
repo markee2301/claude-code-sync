@@ -1,0 +1,7 @@
+# Real config holds your R2 keys + obscured crypt password — never commit it.
+rclone.conf
+
+# Local/OS noise
+*.age
+.DS_Store
+Thumbs.db
