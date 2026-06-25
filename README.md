@@ -60,20 +60,43 @@ remember — never stored). **Use the same passphrase on every machine.**
 **canary** file. `pull` decrypts that canary *before* downloading anything, so a wrong
 passphrase is caught immediately and re-prompted instead of pulling undecryptable data.
 
-## What syncs
+## What syncs (and what doesn't)
 
-Defined in `claude-filter.txt` — edit it to taste.
+Everything is decided by `claude-filter.txt` — edit it to change these defaults.
 
-**On:** `settings.json`, `skills/`, `agents/`, `commands/`, `memory/` + `MEMORY.md`,
-`plans/`, `tasks/`, `plugins-manifest.json` (a path-free list of your plugins +
-marketplaces, generated on push), and `mcp-servers.json` (your local MCP servers,
-snapshotted from `~/.claude.json` on push).
+### Synced ✅
 
-**Off:** the entire `plugins/` dir (its `installed_plugins.json` / `known_marketplaces.json`
-store absolute OS-specific install paths that break on another machine — plugins are
-reinstalled from the manifest instead), conversation history (`projects/`, `sessions/`,
-`history.jsonl` — large; opt in by editing the filter), and anything machine-local or
-secret (`.credentials.json`, `settings.local.json`, caches).
+| Path (under `~/.claude`) | What it is |
+|---|---|
+| `settings.json` | Shared settings: enabled plugins, statusline, marketplaces |
+| `CLAUDE.md` | Global instructions (if you keep one) |
+| `MEMORY.md` + `memory/` | Saved memory and its index |
+| `skills/` | Your custom skills (symlinked skills are dereferenced into real files) |
+| `agents/` | Your custom subagents |
+| `commands/` | Your custom slash commands |
+| `rules/` | Custom rules (if present) |
+| `workflows/` | Custom workflows (if present) |
+| `plans/` | Plan-mode plans |
+| `tasks/` | Task-tracking state |
+| `plugins-manifest.json` | Path-free list of your plugins + marketplaces, generated on push |
+| `mcp-servers.json` | Your local MCP servers, snapshotted from `~/.claude.json` on push |
+
+### Not synced ❌
+
+| Path | Why not |
+|---|---|
+| `plugins/` (whole dir) | `installed_plugins.json` / `known_marketplaces.json` store **absolute OS-specific install paths**, and `cache/` holds thousands of arch-specific files (node_modules, venvs). Plugins are **reinstalled** from `plugins-manifest.json` instead. |
+| `projects/` | Conversation history. Large, and folders are keyed to absolute project paths that differ per machine (so they wouldn't resume cleanly anyway). **Off by default.** |
+| `sessions/` | Live session/runtime state — machine-local. |
+| `history.jsonl` | Prompt-input history. **Off by default** (flip on if you want it). |
+| `.credentials.json` | Your auth token — a secret. Run `/login` on each machine instead. |
+| `settings.local.json` | Per-machine settings/permissions (that's the file's whole purpose). |
+| `shell-snapshots/`, `ide/`, `file-history/` | Machine/OS-specific runtime state (e.g. Windows shell snapshots). |
+| `cache/`, `image-cache/`, `paste-cache/`, `downloads/`, `backups/`, `*.log` | Regenerated caches and local noise. |
+
+> **Want conversation history too?** In `claude-filter.txt`, change `- /projects/**` and
+> `- /history.jsonl` to `+`. Note: those transcripts are keyed to absolute paths, so they
+> won't auto-resume on a machine with a different home dir or OS (see *Limitations* below).
 
 Plugins are restored on `pull` by reinstalling from the synced manifest
 (`claude plugin marketplace add` + `claude plugin install`), so their hardcoded install
@@ -88,6 +111,16 @@ paths don't have to be portable. Login/auth is not synced — run `/login` on th
 - **pull = additive.** Brings R2 down without deleting anything local (uses `copy`).
 
 Rule of thumb: **pull before you work, push when you're done.**
+
+## Limitations
+
+- **Conversation history doesn't auto-resume across machines.** Claude indexes sessions by
+  absolute project path (`~/.claude/projects/-Users-alice-my-app/`). A different username,
+  home dir, or OS produces a different key, so `claude --resume` on machine B won't find
+  machine A's threads even if you sync `projects/`. Settings, skills, agents, commands,
+  memory, and plugins are all path-independent and sync fine — this caveat is *only* about
+  resuming old conversations. (A future version could rewrite paths to a portable token on
+  sync; not implemented yet.)
 
 ## Security
 
