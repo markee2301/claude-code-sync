@@ -130,6 +130,54 @@ paths don't have to be portable. Login/auth is not synced — run `/login` on th
 
 Rule of thumb: **pull before you work, push when you're done.**
 
+## Backups & recovery
+
+Every `push` runs with `--backup-dir`, so the mirror can't lose data silently:
+
+```bash
+rclone sync ~/.claude r2crypt:vault --backup-dir r2crypt:backups/<timestamp>
+```
+
+Before overwriting a changed file or deleting one that's gone locally, rclone **moves the
+old version into `backups/<timestamp>/`** instead of destroying it. Each push that changes
+something creates one timestamped folder containing *only the files it replaced or removed*
+(a delta, not a full snapshot). Pushes that add only new files create no backup. Backups are
+encrypted like everything else.
+
+**Do I need to do anything? Almost never.** Backups are insurance you can ignore until you
+actually notice something *lost or reverted* — a skill, command, agent, or memory file that
+you know you had is suddenly missing or back to an older version. That has one cause: a
+`push` from a machine that **wasn't up to date** overwrote the newer state in R2 (exactly
+what the *pull-before-work* rule prevents). Two ways you'd catch it:
+
+- The push output reports it **deleted** files you didn't expect (e.g. `Deleted: 12`).
+- After a pull, something you rely on is gone or stale.
+
+The `"…recoverable at backups/…"` line printed on every push is informational, not an alert
+— ignore it unless you've actually lost something.
+
+### Restoring a file
+
+From your `claude-code-sync` folder:
+
+```bash
+export RCLONE_CONFIG="$PWD/rclone.conf"
+read -rsp "passphrase: " P; export RCLONE_CONFIG_R2CRYPT_PASSWORD=$(rclone obscure "$P"); unset P; echo
+
+rclone lsf  r2crypt:backups/                       # list snapshots (one per changed push)
+rclone tree r2crypt:backups/<timestamp>            # see what's inside one
+rclone copy "r2crypt:backups/<timestamp>/skills/foo/SKILL.md" ./restored/   # pull a file back
+```
+
+Copy the recovered file into `~/.claude/` to roll it back. There's no "restore everything to
+date X" command — backups are deltas, so recovery is a deliberate cherry-pick.
+
+Backups accumulate (one folder per changed push). To prune old ones:
+
+```bash
+rclone purge r2crypt:backups/<old-timestamp>
+```
+
 ## Limitations
 
 - **Conversation history doesn't auto-resume across machines.** Claude indexes sessions by
