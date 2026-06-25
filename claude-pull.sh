@@ -15,7 +15,7 @@ CANARY="claude-code-sync:passphrase-ok:v1"
 while :; do
   read -rsp "Encryption passphrase: " PASS; echo
   RCLONE_CONFIG_R2CRYPT_PASSWORD="$(rclone obscure "$PASS")"; export RCLONE_CONFIG_R2CRYPT_PASSWORD; unset PASS
-  GOT="$(rclone cat r2crypt:passcheck 2>/dev/null || true)"
+  GOT="$(rclone cat r2crypt:passcheck 2>/dev/null | tr -d '\r\n' || true)"
   if [ "$GOT" = "$CANARY" ]; then echo "Passphrase verified."; break; fi
   if [ -z "$GOT" ]; then
     read -rp "Couldn't read the canary — wrong passphrase, or nothing pushed yet. Continue anyway? [y/N] " yn
