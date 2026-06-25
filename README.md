@@ -15,6 +15,18 @@ passphrase on another machine and it decrypts.
 - A Cloudflare R2 bucket + an API token (Dashboard → R2 → Manage API Tokens)
 - Node.js (already ships with Claude Code) — used for the MCP + plugin steps
 
+## Create your R2 bucket
+
+You store everything in your own Cloudflare R2 (free tier is plenty — the synced config is
+only a few MB).
+
+1. Go to **Cloudflare Dashboard → R2 Object Storage** (enable R2 the first time).
+2. Click **Create bucket** → name it `claude-sync`.
+3. Go to **Manage R2 API Tokens → Create API Token**.
+4. Select **Object Read & Write** permission → **Create**.
+5. Copy the values you'll paste into `setup`: **Account ID**, **Access Key ID**, and
+   **Secret Access Key** (the secret is shown only once).
+
 ## Setup & daily use
 
 Clone it once on each machine:
