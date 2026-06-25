@@ -1,4 +1,4 @@
-# Configure rclone for claude-sync. Writes a gitignored rclone.conf with your R2 creds.
+# Configure rclone for claude-code-sync. Writes a gitignored rclone.conf with your R2 creds.
 # Run once per machine. The Secret Access Key is read as a SecureString and never hits git.
 $ErrorActionPreference = 'Stop'
 $dir  = Split-Path -Parent $MyInvocation.MyCommand.Path

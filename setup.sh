@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Configure rclone for claude-sync. Writes a gitignored rclone.conf with your R2 creds.
+# Configure rclone for claude-code-sync. Writes a gitignored rclone.conf with your R2 creds.
 # Run once per machine. The Secret Access Key uses a hidden prompt and never hits git.
 set -euo pipefail
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

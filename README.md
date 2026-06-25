@@ -1,4 +1,4 @@
-# claude-sync
+# claude-code-sync
 
 Sync your Claude Code "brain" — skills, agents, commands, plugins, MCP servers, memory,
 settings — across machines through **your own Cloudflare R2**, encrypted before it leaves
