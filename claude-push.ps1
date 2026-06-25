@@ -14,6 +14,12 @@ if ((Test-Path $claudeJson) -and (Get-Command node -ErrorAction SilentlyContinue
   node -e 'const os=require(\"os\"),fs=require(\"fs\"),p=require(\"path\");const j=JSON.parse(fs.readFileSync(p.join(os.homedir(),\".claude.json\"),\"utf8\"));fs.writeFileSync(p.join(process.env.CLAUDE_DIR,\"mcp-servers.json\"),JSON.stringify({mcpServers:j.mcpServers||{}},null,2));console.log(\"mcp-servers.json: \"+Object.keys(j.mcpServers||{}).length+\" server(s)\");'
 }
 
+# 1b. Snapshot installed plugins + marketplaces as a path-free manifest.
+$env:CLAUDE_DIR = $claudeDir
+if (Get-Command node -ErrorAction SilentlyContinue) {
+  node -e 'const fs=require(\"fs\"),p=require(\"path\"),d=process.env.CLAUDE_DIR;const mk=p.join(d,\"plugins\",\"known_marketplaces.json\"),ip=p.join(d,\"plugins\",\"installed_plugins.json\");const o={marketplaces:[],plugins:[]};if(fs.existsSync(mk)){for(const[n,i]of Object.entries(JSON.parse(fs.readFileSync(mk,\"utf8\")))){const r=i.source&&i.source.repo;if(r)o.marketplaces.push({name:n,repo:r});}}if(fs.existsSync(ip)){for(const k of Object.keys(JSON.parse(fs.readFileSync(ip,\"utf8\")).plugins||{})){if(!k.endsWith(\"@local\"))o.plugins.push(k);}}fs.writeFileSync(p.join(d,\"plugins-manifest.json\"),JSON.stringify(o,null,2));console.log(\"plugins-manifest.json: \"+o.marketplaces.length+\" marketplaces, \"+o.plugins.length+\" plugins\");'
+}
+
 # 2. Encryption passphrase — never stored.
 $sec = Read-Host 'Encryption passphrase' -AsSecureString
 $pass = [System.Net.NetworkCredential]::new('', $sec).Password

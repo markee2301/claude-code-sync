@@ -29,18 +29,20 @@ if [ -f "$CLAUDE_DIR/mcp-servers.json" ] && command -v node >/dev/null; then
     const n=Object.keys(add);console.log("Merged MCP server(s): "+(n.length?n.join(", "):"none"));'
 fi
 
-# 3. Restore marketplaces + plugins from the synced manifest (best-effort, skips @local).
-if command -v claude >/dev/null && [ -f "$CLAUDE_DIR/plugins/known_marketplaces.json" ]; then
+# 3. Restore marketplaces + plugins from the path-free manifest (best-effort, skips @local).
+if ! command -v claude >/dev/null; then
+  echo "NOTE: 'claude' not on PATH — skipping plugin restore. Re-run this script (or the"
+  echo "      'claude plugin marketplace add/install' commands) once Claude Code's CLI is available."
+elif [ -f "$CLAUDE_DIR/plugins-manifest.json" ]; then
   echo "Restoring marketplaces + plugins ..."
   while IFS= read -r cmd; do
     [ -z "$cmd" ] && continue
     echo "+ $cmd"
     eval "$cmd" || echo "  (skipped — may already exist)"
-  done < <(node -e 'const fs=require("fs"),p=require("path");const b=process.env.CLAUDE_DIR;
-    const mk=JSON.parse(fs.readFileSync(p.join(b,"plugins","known_marketplaces.json"),"utf8"));
-    const ip=JSON.parse(fs.readFileSync(p.join(b,"plugins","installed_plugins.json"),"utf8"));
-    const o=[];for(const m of Object.values(mk)){const r=m.source&&m.source.repo;if(r)o.push("claude plugin marketplace add "+r);}
-    for(const k of Object.keys(ip.plugins||{})){if(k.endsWith("@local"))continue;o.push("claude plugin install "+k);}
+  done < <(node -e 'const fs=require("fs"),p=require("path");
+    const m=JSON.parse(fs.readFileSync(p.join(process.env.CLAUDE_DIR,"plugins-manifest.json"),"utf8"));
+    const o=[];for(const mk of m.marketplaces)o.push("claude plugin marketplace add "+mk.repo);
+    for(const pl of m.plugins)o.push("claude plugin install "+pl);
     process.stdout.write(o.join("\n"));')
 fi
 

@@ -2,8 +2,9 @@
 # Paths are relative to ~/.claude. Edit to taste.
 
 # --- Heavy / secret: never sync (listed first so they win) ---
-- /plugins/cache/**
-- /plugins/marketplaces/**
+# Whole plugins/ dir is excluded: its manifests carry absolute OS-specific install
+# paths that break on another machine. Plugins are restored from plugins-manifest.json.
+- /plugins/**
 - /projects/**
 - /sessions/**
 - /history.jsonl
@@ -30,8 +31,7 @@
 + /memory/**
 + /plans/**
 + /tasks/**
-+ /plugins/installed_plugins.json
-+ /plugins/known_marketplaces.json
++ /plugins-manifest.json
 
 # --- Everything else excluded ---
 - *

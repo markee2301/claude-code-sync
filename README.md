@@ -41,12 +41,15 @@ stored). Use the **same passphrase on every machine.**
 Defined in `claude-filter.txt` — edit it to taste.
 
 **On:** `settings.json`, `skills/`, `agents/`, `commands/`, `memory/` + `MEMORY.md`,
-`plans/`, `tasks/`, the plugin manifests, and `mcp-servers.json` (your local MCP servers,
+`plans/`, `tasks/`, `plugins-manifest.json` (a path-free list of your plugins +
+marketplaces, generated on push), and `mcp-servers.json` (your local MCP servers,
 snapshotted from `~/.claude.json` on push).
 
-**Off:** conversation history (`projects/`, `sessions/`, `history.jsonl` — large; opt in by
-editing the filter), plugin *code* (`plugins/cache/` — reinstalled instead), and anything
-machine-local or secret (`.credentials.json`, `settings.local.json`, caches).
+**Off:** the entire `plugins/` dir (its `installed_plugins.json` / `known_marketplaces.json`
+store absolute OS-specific install paths that break on another machine — plugins are
+reinstalled from the manifest instead), conversation history (`projects/`, `sessions/`,
+`history.jsonl` — large; opt in by editing the filter), and anything machine-local or
+secret (`.credentials.json`, `settings.local.json`, caches).
 
 Plugins are restored on `pull` by reinstalling from the synced manifest
 (`claude plugin marketplace add` + `claude plugin install`), so their hardcoded install

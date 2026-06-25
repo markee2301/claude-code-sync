@@ -18,6 +18,18 @@ if [ -f "$HOME/.claude.json" ] && command -v node >/dev/null; then
     console.log("mcp-servers.json: "+Object.keys(j.mcpServers||{}).length+" server(s)");'
 fi
 
+# 1b. Snapshot installed plugins + marketplaces as a path-free manifest.
+#     (The raw plugins/*.json carry absolute OS-specific paths — we never sync those.)
+if command -v node >/dev/null; then
+  node -e 'const fs=require("fs"),p=require("path"),d=process.env.CLAUDE_DIR;
+    const mk=p.join(d,"plugins","known_marketplaces.json"),ip=p.join(d,"plugins","installed_plugins.json");
+    const o={marketplaces:[],plugins:[]};
+    if(fs.existsSync(mk)){for(const[n,i]of Object.entries(JSON.parse(fs.readFileSync(mk,"utf8")))){const r=i.source&&i.source.repo;if(r)o.marketplaces.push({name:n,repo:r});}}
+    if(fs.existsSync(ip)){for(const k of Object.keys(JSON.parse(fs.readFileSync(ip,"utf8")).plugins||{})){if(!k.endsWith("@local"))o.plugins.push(k);}}
+    fs.writeFileSync(p.join(d,"plugins-manifest.json"),JSON.stringify(o,null,2));
+    console.log("plugins-manifest.json: "+o.marketplaces.length+" marketplaces, "+o.plugins.length+" plugins");'
+fi
+
 # 2. Encryption passphrase — never stored, prompted each run.
 read -rsp "Encryption passphrase: " PASS; echo
 RCLONE_CONFIG_R2CRYPT_PASSWORD="$(rclone obscure "$PASS")"; export RCLONE_CONFIG_R2CRYPT_PASSWORD
