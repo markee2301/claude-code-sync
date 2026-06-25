@@ -18,8 +18,8 @@ passphrase on another machine and it decrypts.
 ## Setup (once per machine)
 
 ```bash
-git clone https://github.com/markee2301/claude-sync.git
-cd claude-sync
+git clone https://github.com/markee2301/claude-code-sync.git
+cd claude-code-sync
 ./setup.sh        # Windows PowerShell: .\setup.ps1
 ```
 
