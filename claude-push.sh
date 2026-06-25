@@ -30,10 +30,15 @@ if command -v node >/dev/null; then
     console.log("plugins-manifest.json: "+o.marketplaces.length+" marketplaces, "+o.plugins.length+" plugins");'
 fi
 
-# 2. Encryption passphrase — never stored, prompted each run.
+# 2. Encryption passphrase — never stored. Entered twice to catch typos.
 read -rsp "Encryption passphrase: " PASS; echo
+read -rsp "Confirm passphrase:    " PASS2; echo
+if [ "$PASS" != "$PASS2" ]; then echo "Passphrases don't match. Aborting."; exit 1; fi
 RCLONE_CONFIG_R2CRYPT_PASSWORD="$(rclone obscure "$PASS")"; export RCLONE_CONFIG_R2CRYPT_PASSWORD
-unset PASS
+unset PASS PASS2
+
+# 2b. Refresh the passphrase canary so future pulls can verify the passphrase.
+printf '%s' "claude-code-sync:passphrase-ok:v1" | rclone rcat r2crypt:passcheck
 
 # 3. Mirror to R2. Replaced/deleted blobs are kept under backups/<timestamp>, not destroyed.
 TS="$(date +%Y%m%d-%H%M%S)"

@@ -36,6 +36,10 @@ cd claude-code-sync
 Each prompts for your encryption passphrase (the one thing to remember — it's never
 stored). Use the **same passphrase on every machine.**
 
+`push` asks for it **twice** (typo guard). `push` also writes a small encrypted **canary**
+file, and `pull` decrypts that canary *before* downloading anything — so a wrong passphrase
+is caught immediately and re-prompted instead of pulling undecryptable data.
+
 ## What syncs
 
 Defined in `claude-filter.txt` — edit it to taste.

@@ -10,10 +10,20 @@ mkdir -p "$CLAUDE_DIR"
 
 [ -f "$RCLONE_CONFIG" ] || { echo "No rclone.conf — run ./setup.sh first."; exit 1; }
 
-# 1. Passphrase (same one used on push).
-read -rsp "Encryption passphrase: " PASS; echo
-RCLONE_CONFIG_R2CRYPT_PASSWORD="$(rclone obscure "$PASS")"; export RCLONE_CONFIG_R2CRYPT_PASSWORD
-unset PASS
+# 1. Passphrase (same one used on push), verified against the canary before any download.
+CANARY="claude-code-sync:passphrase-ok:v1"
+while :; do
+  read -rsp "Encryption passphrase: " PASS; echo
+  RCLONE_CONFIG_R2CRYPT_PASSWORD="$(rclone obscure "$PASS")"; export RCLONE_CONFIG_R2CRYPT_PASSWORD; unset PASS
+  GOT="$(rclone cat r2crypt:passcheck 2>/dev/null || true)"
+  if [ "$GOT" = "$CANARY" ]; then echo "Passphrase verified."; break; fi
+  if [ -z "$GOT" ]; then
+    read -rp "Couldn't read the canary — wrong passphrase, or nothing pushed yet. Continue anyway? [y/N] " yn
+    case "$yn" in [Yy]*) break;; *) echo "Aborted."; exit 1;; esac
+  else
+    echo "Wrong passphrase. Try again."
+  fi
+done
 
 echo "Pulling r2crypt:vault -> $CLAUDE_DIR ..."
 rclone copy r2crypt:vault "$CLAUDE_DIR" -L --filter-from "$FILTER" --transfers 8 --progress

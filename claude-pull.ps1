@@ -10,10 +10,23 @@ New-Item -ItemType Directory -Force -Path $claudeDir | Out-Null
 
 if (-not (Test-Path $env:RCLONE_CONFIG)) { Write-Host 'No rclone.conf — run .\setup.ps1 first.'; exit 1 }
 
-$sec = Read-Host 'Encryption passphrase' -AsSecureString
-$pass = [System.Net.NetworkCredential]::new('', $sec).Password
-$env:RCLONE_CONFIG_R2CRYPT_PASSWORD = (rclone obscure $pass)
-$pass = $null
+$CANARY = 'claude-code-sync:passphrase-ok:v1'
+while ($true) {
+  $sec = Read-Host 'Encryption passphrase' -AsSecureString
+  $pass = [System.Net.NetworkCredential]::new('', $sec).Password
+  $env:RCLONE_CONFIG_R2CRYPT_PASSWORD = (rclone obscure $pass)
+  $pass = $null
+  $prevEAP = $ErrorActionPreference; $ErrorActionPreference = 'SilentlyContinue'
+  $got = (rclone cat r2crypt:passcheck 2>$null | Out-String).Trim()
+  $ErrorActionPreference = $prevEAP
+  if ($got -eq $CANARY) { Write-Host 'Passphrase verified.'; break }
+  if ([string]::IsNullOrEmpty($got)) {
+    $ans = Read-Host "Couldn't read the canary - wrong passphrase, or nothing pushed yet. Continue anyway? [y/N]"
+    if ($ans -match '^[Yy]') { break } else { Write-Host 'Aborted.'; exit 1 }
+  } else {
+    Write-Host 'Wrong passphrase. Try again.'
+  }
+}
 
 Write-Host "Pulling r2crypt:vault -> $claudeDir ..."
 rclone copy r2crypt:vault $claudeDir -L --filter-from $filter --transfers 8 --progress

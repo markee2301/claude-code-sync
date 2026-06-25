@@ -20,11 +20,17 @@ if (Get-Command node -ErrorAction SilentlyContinue) {
   node -e 'const fs=require(\"fs\"),p=require(\"path\"),d=process.env.CLAUDE_DIR;const mk=p.join(d,\"plugins\",\"known_marketplaces.json\"),ip=p.join(d,\"plugins\",\"installed_plugins.json\");const o={marketplaces:[],plugins:[]};if(fs.existsSync(mk)){for(const[n,i]of Object.entries(JSON.parse(fs.readFileSync(mk,\"utf8\")))){const r=i.source&&i.source.repo;if(r)o.marketplaces.push({name:n,repo:r});}}if(fs.existsSync(ip)){for(const k of Object.keys(JSON.parse(fs.readFileSync(ip,\"utf8\")).plugins||{})){if(!k.endsWith(\"@local\"))o.plugins.push(k);}}fs.writeFileSync(p.join(d,\"plugins-manifest.json\"),JSON.stringify(o,null,2));console.log(\"plugins-manifest.json: \"+o.marketplaces.length+\" marketplaces, \"+o.plugins.length+\" plugins\");'
 }
 
-# 2. Encryption passphrase — never stored.
-$sec = Read-Host 'Encryption passphrase' -AsSecureString
-$pass = [System.Net.NetworkCredential]::new('', $sec).Password
-$env:RCLONE_CONFIG_R2CRYPT_PASSWORD = (rclone obscure $pass)
-$pass = $null
+# 2. Encryption passphrase — never stored. Entered twice to catch typos.
+$sec1 = Read-Host 'Encryption passphrase' -AsSecureString
+$sec2 = Read-Host 'Confirm passphrase' -AsSecureString
+$p1 = [System.Net.NetworkCredential]::new('', $sec1).Password
+$p2 = [System.Net.NetworkCredential]::new('', $sec2).Password
+if ($p1 -ne $p2) { Write-Host "Passphrases don't match. Aborting."; exit 1 }
+$env:RCLONE_CONFIG_R2CRYPT_PASSWORD = (rclone obscure $p1)
+$p1 = $null; $p2 = $null
+
+# 2b. Refresh the passphrase canary so future pulls can verify the passphrase.
+'claude-code-sync:passphrase-ok:v1' | rclone rcat r2crypt:passcheck
 
 # 3. Mirror to R2 with a timestamped backup of replaced/deleted blobs.
 $ts = Get-Date -Format 'yyyyMMdd-HHmmss'
