@@ -4,16 +4,23 @@ Sync your Claude Code "brain" — skills, agents, commands, plugins, MCP servers
 settings — across machines through **your own Cloudflare R2**, encrypted before it leaves
 your computer. No third-party server, no subscription.
 
-It's two scripts on top of [`rclone`](https://rclone.org). rclone's `crypt` backend
+A few small scripts on top of [`rclone`](https://rclone.org). rclone's `crypt` backend
 encrypts every file client-side with a passphrase and uploads only what changed. R2 only
 ever stores scrambled blobs (filenames included) that Cloudflare can't read. Type the same
-passphrase on another machine and it decrypts.
+passphrase on another machine and it decrypts. **Works on Windows, macOS, and Linux.**
 
 ## What you need
 
-- [rclone](https://rclone.org/downloads/) — `winget install Rclone.Rclone` / `brew install rclone`
+- [rclone](https://rclone.org/downloads/):
+  - Windows — `winget install Rclone.Rclone`
+  - macOS — `brew install rclone`
+  - Linux — `sudo apt install rclone` (or `curl https://rclone.org/install.sh | sudo bash` for the latest)
 - A Cloudflare R2 bucket + an API token (Dashboard → R2 → Manage API Tokens)
 - Node.js (already ships with Claude Code) — used for the MCP + plugin steps
+
+The scripts: `setup` (configure R2 once), `claude-push` / `claude-pull` (sync), and
+`claude-restore` (recover a file from a backup). Each ships as a `.sh` (macOS/Linux/Git Bash)
+and a `.ps1` (Windows PowerShell).
 
 ## Create your R2 bucket
 
